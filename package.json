@@ -6,7 +6,7 @@
   "author": "wemlion <angusfu1126@qq.com>",
   "license": "MIT",
   "scripts": {
-    "dev": "rollup -w -c scripts/config.js --environment TARGET:web-full-dev",
+    "dev": "rm -rf dist  && npm run dev:esm",
     "dev:cjs": "rollup -w -c scripts/config.js --environment TARGET:web-runtime-cjs-dev",
     "dev:esm": "rollup -w -c scripts/config.js --environment TARGET:web-runtime-esm",
     "build": "node scripts/build.js"

@@ -168,7 +168,20 @@ function genConfig (name) {
   config.plugins.push(replace(vars))
 
   if (opts.transpile !== false) {
-    config.plugins.push(buble())
+    config.plugins.push(buble({
+      transforms: {
+        arrow: false,
+        classes: false,
+        asyncAwait: false,
+        conciseMethodProperty: false,
+        templateString: false,
+        destructuring: false,
+        parameterDestructuring: false,
+        defaultParameter: false,
+        letConst: false,
+        exponentiation: true
+      }
+    }))
   }
 
   Object.defineProperty(config, '_name', {
