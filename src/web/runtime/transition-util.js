@@ -85,12 +85,12 @@ export function removeTransitionClass (el: any, cls: string) {
   removeClass(el, cls)
 }
 
-export function whenTransitionEnds (
+export async function whenTransitionEnds (
   el: Element,
   expectedType: ?string,
   cb: Function
 ) {
-  const { type, timeout, propCount } = getTransitionInfo(el, expectedType)
+  const { type, timeout, propCount } = await getTransitionInfo(el, expectedType)
   if (!type) return cb()
   const event: string = type === TRANSITION ? transitionEndEvent : animationEndEvent
   let ended = 0
@@ -115,13 +115,13 @@ export function whenTransitionEnds (
 
 const transformRE = /\b(transform|all)(,|$)/
 
-export function getTransitionInfo (el: Element, expectedType?: ?string): {
+export async function getTransitionInfo (el: Element, expectedType?: ?string): {
   type: ?string;
   propCount: number;
   timeout: number;
   hasTransform: boolean;
 } {
-  const styles: any = window.getComputedStyle(el)
+  const styles: any = await el.manipulateAsync('getComputedStyle')
   // JSDOM may return undefined for transition properties
   const transitionDelays: Array<string> = (styles[transitionProp + 'Delay'] || '').split(', ')
   const transitionDurations: Array<string> = (styles[transitionProp + 'Duration'] || '').split(', ')

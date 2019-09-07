@@ -80,7 +80,8 @@ export default {
       for (let i = 0; i < prevChildren.length; i++) {
         const c: VNode = prevChildren[i]
         c.data.transition = transitionData
-        c.data.pos = c.elm.getBoundingClientRect()
+        // c.data.pos = c.elm.getBoundingClientRect()
+        c.elm.getBoundingClientRectAsync().then(pos => (c.data.pos = (pos)))
         if (map[c.key]) {
           kept.push(c)
         } else {
@@ -94,17 +95,17 @@ export default {
     return h(tag, null, children)
   },
 
-  updated () {
+  async updated () {
     const children: Array<VNode> = this.prevChildren
     const moveClass: string = this.moveClass || ((this.name || 'v') + '-move')
-    if (!children.length || !this.hasMove(children[0].elm, moveClass)) {
+    if (!children.length || !(await this.hasMove(children[0].elm, moveClass))) {
       return
     }
 
     // we divide the work into three loops to avoid mixing DOM reads and writes
     // in each iteration - which helps prevent layout thrashing.
     children.forEach(callPendingCbs)
-    children.forEach(recordPosition)
+    await Promise.all(children.map(recordPosition))
     children.forEach(applyTranslation)
 
     // force reflow to put everything in position
@@ -133,7 +134,7 @@ export default {
   },
 
   methods: {
-    hasMove (el: any, moveClass: string): boolean {
+    async hasMove (el: any, moveClass: string): boolean {
       /* istanbul ignore if */
       if (!hasTransition) {
         return false
@@ -154,7 +155,7 @@ export default {
       addClass(clone, moveClass)
       clone.style.display = 'none'
       this.$el.appendChild(clone)
-      const info: Object = getTransitionInfo(clone)
+      const info: Object = await getTransitionInfo(clone)
       this.$el.removeChild(clone)
       return (this._hasMove = info.hasTransform)
     }
@@ -172,8 +173,8 @@ function callPendingCbs (c: VNode) {
   }
 }
 
-function recordPosition (c: VNode) {
-  c.data.newPos = c.elm.getBoundingClientRect()
+async function recordPosition (c: VNode) {
+  c.data.newPos = await c.elm.getBoundingClientRectAsync()
 }
 
 function applyTranslation (c: VNode) {
